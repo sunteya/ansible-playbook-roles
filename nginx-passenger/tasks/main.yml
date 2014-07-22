@@ -1,0 +1,21 @@
+---
+- homebrew: name=nginx state=latest install_options=with-passenger,with-spdy
+  environment: env
+
+- file: dest={{item}} state=directory
+  with_items:
+    - /usr/local/etc/nginx/conf.d/
+    - /usr/local/etc/nginx/sites-enabled/
+    - /usr/local/etc/nginx/sites-available/
+    - /usr/local/etc/init.d/
+    - /usr/local/etc/logrotate.d/
+
+- copy: dest=/usr/local/etc/nginx/nginx.conf src=nginx.conf
+- copy: dest=/usr/local/etc/nginx/conf.d/passenger.conf src=passenger.conf
+- copy: dest=/usr/local/etc/init.d/nginx src=nginx.init mode=0755
+- copy: dest=/usr/local/etc/logrotate.d/nginx src=nginx.logrotate
+
+- file: src=/usr/local/etc/init.d/nginx dest=/etc/init.d/nginx state=link
+- file: src=/usr/local/etc/logrotate.d/nginx dest=/etc/logrotate.d/nginx state=link
+
+- service: name=nginx enabled=yes
