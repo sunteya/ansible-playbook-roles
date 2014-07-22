@@ -1,0 +1,22 @@
+---
+- homebrew: name=rbenv state=latest
+  environment: env
+
+- homebrew: name=ruby-build state=latest install_options=without-autoconf,without-openssl,without-pkg-config
+  environment: env
+
+- copy: dest=/etc/profile.d/rbenv.sh src=rbenv.init.sh
+
+- name: install ruby-build build environment
+  apt: name={{item}} state=latest
+  environment: env
+  with_items:
+    - autoconf
+    - bison
+    - build-essential
+    - libssl-dev
+    - libyaml-dev
+    - libreadline6
+    - libreadline6-dev
+    - zlib1g
+    - zlib1g-dev
