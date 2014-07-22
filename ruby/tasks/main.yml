@@ -1,0 +1,12 @@
+---
+- shell: "bash -l -c 'rbenv install {{ruby_version}}'"
+  environment: env
+  args:
+    creates: "/usr/local/var/rbenv/versions/{{ruby_version}}"
+
+- file: "dest=/usr/local/var/rbenv/versions/{{ruby_version}}/etc state=directory"
+- copy: "dest=/usr/local/var/rbenv/versions/{{ruby_version}}/etc/gemrc src=gemrc"
+
+- shell: "bash -l -c 'rbenv global {{ruby_version}}'"
+  args:
+    creates: /usr/local/var/rbenv/version
