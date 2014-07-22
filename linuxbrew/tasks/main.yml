@@ -1,0 +1,31 @@
+---
+- name: install linuxbrew dependencies
+  apt: name={{item}} state=latest
+  environment: env
+  with_items:
+    - build-essential
+    - curl
+    - git
+    - m4
+    - ruby
+    - ruby-dev
+    - rake
+    - texinfo
+    - libbz2-dev
+    - libcurl4-openssl-dev
+    - zlib1g-dev
+    - libexpat-dev
+    - libncurses-dev
+
+- name: install linuxbrew by git repo
+  shell: git init && git remote add origin https://github.com/Homebrew/linuxbrew.git && git fetch origin --depth=1 && git checkout linuxbrew --force
+  environment: env
+  args:
+    chdir: /usr/local
+    creates: .git
+
+- name: setup linuxbrew init script
+  copy: dest=/etc/profile.d/linuxbrew.sh src=linuxbrew.init.sh
+
+- file: dest=/usr/local/etc/bash_completion.d/ state=directory
+- file: src=/usr/local/Library/Contributions/brew_bash_completion.sh dest=/usr/local/etc/bash_completion.d/brew_bash_completion.sh state=link
