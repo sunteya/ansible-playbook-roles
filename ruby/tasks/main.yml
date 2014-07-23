@@ -1,6 +1,6 @@
 ---
 - shell: "bash -l -c 'rbenv install {{ruby_version}}'"
-  environment: env
+  environment: "{{ env | default({}) }}"
   args:
     creates: "/usr/local/var/rbenv/versions/{{ruby_version}}"
 

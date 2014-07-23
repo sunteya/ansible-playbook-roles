@@ -1,7 +1,7 @@
 ---
 - name: install linuxbrew dependencies
   apt: name={{item}} state=latest
-  environment: env
+  environment: "{{ env | default({}) }}"
   with_items:
     - build-essential
     - curl
@@ -19,7 +19,7 @@
 
 - name: install linuxbrew by git repo
   shell: git init && git remote add origin https://github.com/Homebrew/linuxbrew.git && git fetch origin --depth=1 && git checkout linuxbrew --force
-  environment: env
+  environment: "{{ env | default({}) }}"
   args:
     chdir: /usr/local
     creates: .git

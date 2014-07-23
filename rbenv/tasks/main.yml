@@ -1,15 +1,15 @@
 ---
 - homebrew: name=rbenv state=latest
-  environment: env
+  environment: "{{ env | default({}) }}"
 
 - homebrew: name=ruby-build state=latest install_options=without-autoconf,without-openssl,without-pkg-config
-  environment: env
+  environment: "{{ env | default({}) }}"
 
 - copy: dest=/etc/profile.d/rbenv.sh src=rbenv.init.sh
 
 - name: install ruby-build build environment
   apt: name={{item}} state=latest
-  environment: env
+  environment: "{{ env | default({}) }}"
   with_items:
     - autoconf
     - bison

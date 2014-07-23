@@ -1,6 +1,6 @@
 ---
 - homebrew: name=nginx state=latest install_options=with-passenger,with-spdy
-  environment: env
+  environment: "{{ env | default({}) }}"
 
 - file: dest={{item}} state=directory
   with_items:
