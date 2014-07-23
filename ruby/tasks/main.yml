@@ -7,11 +7,16 @@
 - file: "dest=/usr/local/var/rbenv/versions/{{ruby_version}}/etc state=directory"
 - copy: "dest=/usr/local/var/rbenv/versions/{{ruby_version}}/etc/gemrc src=gemrc"
 
+- shell: "bash -l -c 'rbenv global'"
+  register: rbenv_global
+  changed_when: false
+
 - shell: "bash -l -c 'rbenv global {{ruby_version}}'"
-  args:
-    creates: /usr/local/var/rbenv/version
+  when: 'rbenv_global.stdout == "system"'
 
 - shell: "bash -l -c 'rbenv rehash'"
   changed_when: false
-  args:
-    removes: /usr/local/var/rbenv/version
+
+- gem: name=bundler executable=/usr/local/var/rbenv/shims/gem user_install=no
+  when: 'rbenv_global.stdout == "{{ruby_version}}"'
+  environment: "{{ env | default({}) }}"
