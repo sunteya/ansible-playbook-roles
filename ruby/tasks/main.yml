@@ -10,3 +10,8 @@
 - shell: "bash -l -c 'rbenv global {{ruby_version}}'"
   args:
     creates: /usr/local/var/rbenv/version
+
+- shell: "bash -l -c 'rbenv rehash'"
+  changed_when: false
+  args:
+    removes: /usr/local/var/rbenv/version
