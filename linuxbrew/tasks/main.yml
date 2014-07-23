@@ -16,6 +16,8 @@
     - zlib1g-dev
     - libexpat-dev
     - libncurses-dev
+  register: command_result
+  changed_when: "command_result.stdout.find('0 upgraded, 0 newly installed, 0 to remove') == -1"
 
 - name: install linuxbrew by git repo
   shell: git init && git remote add origin https://github.com/Homebrew/linuxbrew.git && git fetch origin --depth=1 && git checkout linuxbrew --force
