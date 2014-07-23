@@ -1,9 +1,10 @@
 ---
-- homebrew: name=rbenv state=latest
+- homebrew: name={{item.name}} install_options={{ item.options | default() }} state=latest
   environment: "{{ env | default({}) }}"
-
-- homebrew: name=ruby-build state=latest install_options=without-autoconf,without-openssl,without-pkg-config
-  environment: "{{ env | default({}) }}"
+  with_items:
+    - { name: rbenv }
+    - { name: ruby-build, options: without-autoconf,without-openssl,without-pkg-config }
+    - { name: rbenv-gem-rehash }
 
 - copy: dest=/etc/profile.d/rbenv.sh src=rbenv.init.sh
 
