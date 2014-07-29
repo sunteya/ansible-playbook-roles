@@ -3,7 +3,7 @@
   environment: "{{ env | default({}) }}"
   with_items:
     - { name: rbenv }
-    - { name: ruby-build, options: without-autoconf,without-openssl,without-pkg-config }
+    - { name: ruby-build, options: "without-autoconf,without-openssl,without-pkg-config" }
     - { name: rbenv-gem-rehash }
 
 - copy: dest=/etc/profile.d/rbenv.sh src=rbenv.init.sh
