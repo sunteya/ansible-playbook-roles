@@ -1,0 +1,13 @@
+---
+- shell: "bash -l -c 'nodenv install {{node_version}}'"
+  environment: "{{ env | default({}) }}"
+  args:
+    creates: "/usr/local/var/nodenv/versions/{{node_version}}"
+
+- shell: "bash -l -c 'nodenv version || echo'"
+  register: nodenv_global
+  changed_when: false
+  ignore_errors: yes
+
+- shell: "bash -l -c 'nodenv global {{node_version}}'"
+  when: 'nodenv_global.stdout == ""'
