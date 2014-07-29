@@ -1,0 +1,5 @@
+---
+- homebrew: name=nodenv state=latest
+  environment: "{{ env | default({}) }}"
+
+- copy: dest=/etc/profile.d/nodenv.sh src=nodenv.init.sh
