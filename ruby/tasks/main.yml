@@ -17,6 +17,10 @@
 - shell: "bash -l -c 'rbenv rehash'"
   changed_when: false
 
+- shell: "bash -l -c 'rbenv global'"
+  register: rbenv_global
+  changed_when: false
+
 - gem: name=bundler executable=/usr/local/var/rbenv/shims/gem user_install=no
   when: 'rbenv_global.stdout == "{{ruby_version}}"'
   environment: "{{ env | default({}) }}"
