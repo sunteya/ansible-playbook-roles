@@ -1,0 +1,30 @@
+---
+# - apt: name=libpam0g-dev state=latest
+#   environment: "{{ env | default({}) }}"
+
+# - homebrew: name=monit state=latest
+#   environment: "{{ env | default({}) }}"
+
+- file: dest={{item}} state=directory
+  with_items:
+    - /usr/local/etc/default/
+    - /usr/local/etc/init.d/
+    - /usr/local/etc/logrotate.d/
+    - /usr/local/etc/monit/conf.d/
+    - /usr/local/var/monit
+
+- copy: dest=/usr/local/etc/{{item}} src={{item}}
+  with_items:
+    - init.d/monit
+    - monit/monitrc
+    - logrotate.d/monit
+    - default/monit
+
+- file: dest=/usr/local/etc/monit/monitrc mode=600
+- file: dest=/usr/local/etc/init.d/monit mode=755
+
+- file: src=/usr/local/etc/default/monit dest=/etc/default/monit state=link
+- file: src=/usr/local/etc/init.d/monit dest=/etc/init.d/monit state=link
+- file: src=/usr/local/etc/logrotate.d/monit dest=/etc/logrotate.d/monit state=link
+
+# - service: name=nginx enabled=yes
