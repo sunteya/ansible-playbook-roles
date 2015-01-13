@@ -1,4 +1,3 @@
-export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 export HOMEBREW_CACHE=/var/cache/Homebrew
 
 if [ -x /usr/bin/pkg-config ]; then
