@@ -15,7 +15,7 @@
   - name: install docker-compose
     shell: "curl -s -L https://github.com/docker/compose/releases/download/{{docker_compose_version}}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
     environment: "{{ env | default({}) }}"
-    when: "not docker_compose_version in installed_docker_compose.stdout"
+    when: "installed_docker_compose.stdout != 'docker-compose {{docker_compose_version}}'"
 
   - file: path=/usr/local/bin/docker-compose mode="a+x"
 
@@ -29,6 +29,6 @@
   - name: install docker-volumes
     shell: "curl -s -L https://github.com/cpuguy83/docker-volumes/releases/download/v{{docker_volumes_version}}/docker-volumes-`uname -s | tr '[:upper:]' '[:lower:]'`-`dpkg --print-architecture` > /usr/local/bin/docker-volumes"
     environment: "{{ env | default({}) }}"
-    when: "not docker_volumes_version in installed_docker_volumes.stdout"
+    when: "installed_docker_volumes.stdout != 'docker-volumes version {{docker_volumes_version}}'"
 
   - file: path=/usr/local/bin/docker-volumes mode="a+x"
