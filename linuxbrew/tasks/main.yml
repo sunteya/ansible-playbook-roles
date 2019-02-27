@@ -1,33 +1,27 @@
 ---
-- name: install linuxbrew dependencies
-  apt: name={{item}} state=latest
+- apt:
+    name: ['build-essential', 'curl', 'git', 'file']
   environment: "{{ env | default({}) }}"
-  with_items:
-    - build-essential
-    - curl
-    - git
-    - m4
-    - ruby
-    - ruby-dev
-    - rake
-    - texinfo
-    - libbz2-dev
-    - libcurl4-openssl-dev
-    - zlib1g-dev
-    - libexpat-dev
-    - libncurses-dev
-  register: command_result
-  changed_when: "command_result.stdout.find('0 upgraded, 0 newly installed, 0 to remove') == -1"
 
-- name: install linuxbrew by git repo
-  shell: "git init && git remote add origin https://github.com/Homebrew/linuxbrew.git && git fetch origin master:refs/remotes/origin/master --depth=1 && git reset --hard origin/master"
-  environment: "{{ env | default({}) }}"
+- user:
+    name: linuxbrew
+    uid: 3000
+    shell: /bin/bash
+
+- shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+  become: true
+  become_user: linuxbrew
+  environment: "{{ env | default({}) | combine({ 'CI': 1 }) }}"
   args:
-    chdir: /usr/local
-    creates: .git
+    creates: /home/linuxbrew/.linuxbrew/bin
 
-- name: setup linuxbrew init script
-  copy: dest=/etc/profile.d/linuxbrew.sh src=linuxbrew.init.sh
+- shell: "cat /home/linuxbrew/.profile | grep \\\\.linuxbrew || echo ''"
+  register: test_profile_linuxbrew
+  changed_when: false
+  become: true
+  become_user: linuxbrew
 
-- file: dest=/usr/local/etc/bash_completion.d/ state=directory
-- file: src=/usr/local/Library/Contributions/brew_bash_completion.sh dest=/usr/local/etc/bash_completion.d/brew_bash_completion.sh state=link
+- shell: echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH"' >> /home/linuxbrew/.profile
+  become: true
+  become_user: linuxbrew
+  when: test_profile_linuxbrew.stdout == ""
