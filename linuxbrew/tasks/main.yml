@@ -8,20 +8,50 @@
     uid: 3000
     shell: /bin/bash
 
-- shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+- name: setup linuxbrew sudoer
+  copy: dest=/etc/sudoers.d/linuxbrew src=linuxbrew.sudoer
+
+- shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
   become: true
   become_user: linuxbrew
   environment: "{{ env | default({}) | combine({ 'CI': 1 }) }}"
   args:
     creates: /home/linuxbrew/.linuxbrew/bin
 
-- shell: "cat /home/linuxbrew/.profile | grep \\\\.linuxbrew || echo ''"
-  register: test_profile_linuxbrew
-  changed_when: false
-  become: true
-  become_user: linuxbrew
+- name: setup linuxbrew wrapper script
+  copy: dest=/usr/local/bin/brew src=brew.wrapper.sh mode=+x
 
-- shell: echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH"' >> /home/linuxbrew/.profile
-  become: true
-  become_user: linuxbrew
-  when: test_profile_linuxbrew.stdout == ""
+- name: setup linuxbrew init script
+  copy: dest=/etc/profile.d/linuxbrew.sh src=linuxbrew.init.sh
+
+# - apt:
+#     name: linuxbrew-wrapper
+#   environment: "{{ env | default({}) }}"
+#
+# - shell: brew
+#   become: true
+#   become_user: linuxbrew
+#   environment: "{{ env | default({}) | combine({ 'TRAVIS': 1 }) }}"
+#   args:
+#     creates: /home/linuxbrew/.linuxbrew
+#
+
+# - shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+#   become: true
+#   become_user: linuxbrew
+#   environment: "{{ env | default({}) | combine({ 'CI': 1 }) }}"
+#   args:
+#     creates: /home/linuxbrew/.linuxbrew/bin
+
+# - shell: "cat /home/linuxbrew/.profile | grep \\\\.linuxbrew || echo ''"
+#   register: test_profile_linuxbrew
+#   changed_when: false
+#   become: true
+#   become_user: linuxbrew
+
+# - shell: echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH"' >> /home/linuxbrew/.profile
+#   become: true
+#   become_user: linuxbrew
+#   when: test_profile_linuxbrew.stdout == ""
+
+  # export http_proxy=http://master.pre.lude.app:20000; export https_proxy=http://master.pre.lude.app:20000
