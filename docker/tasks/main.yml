@@ -1,53 +1,51 @@
 ---
-- name: install docker
-  shell: wget -qO- https://get.docker.com/ | sh
+- apt:
+    name:
+      - curl
+      - apt-transport-https
+      - ca-certificates
+      - software-properties-common
+      - gnupg-agent
   environment: "{{ env | default({}) }}"
-  args:
-    creates: /usr/bin/docker
+
+- apt_key:
+    id: 0EBFCD88
+    url: https://download.docker.com/linux/ubuntu/gpg
+  environment: "{{ env | default({}) }}"
+
+- shell: "dpkg --print-architecture"
+  register: dpkg_architecture_register
+  changed_when: false
+
+- set_fact:
+    dpkg_architecture: "{{dpkg_architecture_register.stdout}}"
+
+- apt_repository:
+    repo: deb [arch={{dpkg_architecture}}] https://download.docker.com/linux/ubuntu {{ansible_lsb.codename}} stable
+    filename: docker
+  environment: "{{ env | default({}) }}"
+
+- apt:
+    name: docker-ce
+    update_cache: yes
+  environment: "{{ env | default({}) }}"
+
+- copy: dest=/etc/docker/daemon.json src=daemon.json force=no
 
 - file: dest=/etc/systemd/system/docker.service.d state=directory
 - copy: dest=/etc/systemd/system/docker.service.d/system-default.conf src=service.system-default.conf
 
-- shell: "/usr/local/bin/docker-compose --version"
-  register: installed_docker_compose
-  changed_when: false
+- name: check linuxbrew
+  shell: which brew
+  register: check_linuxbrew
   ignore_errors: true
-  args:
-    removes: /usr/local/bin/docker-compose
-
-- name: install docker-compose
-  shell: "curl -s -L https://github.com/docker/compose/releases/download/{{docker_compose_version}}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose"
-  environment: "{{ env | default({}) }}"
-  when: "installed_docker_compose.stdout.find('{{docker_compose_version}}') == -1"
-
-- file: path=/usr/local/bin/docker-compose mode="a+x"
-
-- shell: "/usr/local/bin/ctop -v"
-  register: installed_ctop
   changed_when: false
-  ignore_errors: true
-  args:
-    removes: /usr/local/bin/ctop
 
-- name: install ctop
-  shell: "wget https://github.com/bcicen/ctop/releases/download/v{{ctop_version}}/ctop-{{ctop_version}}-`uname -s | tr '[:upper:]' '[:lower:]'`-`dpkg --print-architecture` -O /usr/local/bin/ctop"
+- homebrew:
+    name:
+      - ctop
+      - docker-compose
+  become: true
+  become_user: linuxbrew
   environment: "{{ env | default({}) }}"
-  when: "installed_ctop.stdout.find('{{ctop_version}}') == -1"
-
-- file: path=/usr/local/bin/ctop mode="a+x"
-
-# - shell: "/usr/local/bin/docker-volumes --version"
-#   register: installed_docker_volumes
-#   changed_when: false
-#   ignore_errors: true
-#   args:
-#     removes: /usr/local/bin/docker-volumes
-
-# - name: install docker-volumes
-#   shell: "curl -s -L https://github.com/cpuguy83/docker-volumes/releases/download/v1.{{docker_volumes_version}}/docker-volumes-`uname -s | tr '[:upper:]' '[:lower:]'`-`dpkg --print-architecture` -o /usr/local/bin/docker-volumes"
-#   environment: "{{ env | default({}) }}"
-#   when: "installed_docker_volumes.stdout != 'docker-volumes version {{docker_volumes_version}}'"
-#
-# - file: path=/usr/local/bin/docker-volumes mode="a+x"
-
-- copy: dest=/etc/logrotate.d/docker-container src=logrotate.docker-container
+  when: check_linuxbrew.rc == 0
